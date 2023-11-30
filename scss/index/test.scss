@@ -1,0 +1,16 @@
+$color: #000;
+
+.container {
+    .title {
+        color: $color;
+        margin: 4rem 0 3rem;
+        font-weight: 600;
+        font-size: 35px;
+    }
+
+    .description {
+        color: $color;
+        font-weight: 400;
+        font-size: 14px;
+    }
+}

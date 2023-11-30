@@ -1,0 +1,16 @@
+config.yml
+.history
+.vscode/
+# .shopifyignore
+node_modules/
+# package-lock.json
+# package.json
+# shopify.env.json
+
+# Auto generated files
+# **.autojs.**
+# **.autostyle.**
+
+# Sensitive credentials
+*.env
+shopify.env.json

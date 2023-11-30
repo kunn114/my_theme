@@ -1,0 +1,84 @@
+{% if product.type == 'Bare Product' or product.type == 'Custom Product' or product.type == 'Customized Custom' or product.type == 'Customized Bare' %}
+  <style>
+    form[action="/cart/add"] .btn-hide {
+      display: none !important;
+    }
+  </style>
+  <script type="text/javascript">
+    var addCartForms = document.querySelectorAll('form[action="/cart/add"]');
+    var addCartForm = addCartForms[addCartForms.length - 1];
+    var newButton = document.createElement('a');
+    var defaultVariantId = "{{ product.selected_or_first_available_variant.id }}";
+
+    function getVariantId() {
+      var button = addCartForm.querySelector('[type="submit"], input[type="button"]');
+      if (button && (button.disabled || button.getAttribute('aria-disabled') === 'true')) {
+        return null;
+      }
+
+      var qs = new URLSearchParams(location.search);
+      var variantId = qs.get('variant');
+      if (variantId) {
+      	return variantId;
+      }
+
+      var elem = addCartForm.querySelector("select[name='id']");
+      if (elem) {
+        variantId = elem.options[elem.selectedIndex].value;
+      }
+      return variantId || defaultVariantId;
+    }
+
+    function customizeButton(btn) {
+      newButton.className = btn.className;
+      newButton.innerHTML = "Customize";
+      newButton.style.cursor = 'pointer';
+      newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        {% if product.type == 'Bare Product' or product.type == 'Custom Product' %}
+          document.location = "/pages/customize?product_id={{ product.id }}";
+        {% endif %}
+        {% if product.type == 'Customized Custom' or product.type == 'Customized Bare' %}
+          var variantId = getVariantId();
+          if (variantId) {
+            document.location = "/pages/customize?variant_id=" + variantId;
+          } else {
+            document.location = "/pages/customize";
+          }
+        {% endif %}
+      });
+      btn.parentNode.insertBefore(newButton, btn);
+    }
+
+    function initializeButtons() { 
+      var buttons = addCartForm.querySelectorAll('[type="submit"], input[type="button"], button, a');
+      for (var button of buttons) {
+        if (
+          button.innerText.trim().toLowerCase() === 'add to cart' ||
+          button.innerText.trim().toLowerCase().indexOf('customize') === 0
+        ) {
+          customizeButton(button);
+          button.className = button.className + ' btn-hide';
+          break;
+        }
+      }
+    }
+
+    if (typeof PodEnvyQty === 'string') {
+      quantityInput = document.querySelector(CustomizedAppQuantity)
+      if (quantityInput) {
+        quantityInput.remove();
+      }
+    } else {
+      quantityInput = document.querySelector('form[action="/cart/add"] input[name="quantity"]');
+      if (quantityInput) {
+        quantityInput.parentNode.remove();
+      }
+    }
+
+    window.setTimeout(function() {
+      initializeButtons();
+    }, 3000);
+  </script>
+{% endif %}

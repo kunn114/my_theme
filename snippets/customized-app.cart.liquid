@@ -1,0 +1,139 @@
+<script>
+  var cartConfig = {
+    EditButton: {
+      label: 'Edit',
+      style: 'display: block; font-size: 15px; font-weight: 400; width: fit-content;'
+    }
+  };
+  if (typeof CustomizedAppCartConfig === 'object' ) {
+    for (prop in CustomizedAppCartConfig) {
+      cartConfig[prop] = CustomizedAppCartConfig[prop]
+    }
+  }
+
+  var filterImgClassName = function(n) {
+    return !n.includes('ajax') && !n.includes('lazy') && !n.includes('transition');
+  }
+
+  var imageIsRelated = function(img, checkSrc) {
+	  // Check image is related with the product image url
+    var attrNames = ['src', 'srcset', 'data-src', 'data-srcset'];
+
+    for (var name of attrNames) {
+      var attr = img.getAttribute(name);
+      if (attr && attr.includes(checkSrc)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function updateCustomizedCart() {
+    {% for item in cart.items %}
+      {% if item.product.type == 'Bare Product' or item.product.type == 'Customized Bare' or item.product.type == 'Customized Custom' %}
+        // Update Title link and Add Edit link
+        var allLinks = document.querySelectorAll('a');
+        var productTitle = "{{ item.product.title | replace: '"', '\"' }}".toLowerCase();
+        for (link of allLinks) {
+          if (link.innerText.toLowerCase().trim().includes(productTitle) && link.href.includes("{{ item.url }}")) {
+            link.href = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+
+            var edit = document.createElement('a');
+            edit.innerText = cartConfig.EditButton.label;
+            edit.style = cartConfig.EditButton.style;
+            edit.href = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+            link.parentNode.insertBefore(edit, link.nextSibling);
+
+            break;
+          }
+        }
+
+        // Update Image and Link
+        var allImages = document.querySelectorAll('img');
+        var imgUrl = "{{item | img_url}}";
+        var checkSrc = imgUrl.substring(0, imgUrl.lastIndexOf('_'));
+        for (image of allImages) {
+          if (imageIsRelated(image, checkSrc)) {
+            var newImage = document.createElement("img");
+            newImage.style = image.style;
+            newImage.src = "{{ item.properties['_Design Image URL'] }}";
+            newImage.className = image.className.split(' ').filter(filterImgClassName).join(' ')
+            image.parentNode.replaceChild(newImage, image);
+            newImage.addEventListener("click", function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              document.location = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+            });
+            break;
+          }
+        }
+      {% endif %}
+    {% endfor %}
+
+    // Check if store has old theme
+    hasOldImages = document.querySelector('img[src=""]');
+    if (hasOldImages) {
+      {% for item in cart.items %}
+        {% if item.product.type == 'Bare Product' %}
+          // Update image and image link for old store
+          oldImages = document.querySelectorAll('img[src=""]');
+          oldImages[0].src = "{{ item.properties['_Design Image URL'] }}";
+          oldImages[0].addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.location = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+          });
+          parent = image.parentNode;
+          parentCount = 0;
+          while (parentCount < 5 && parent.tagName !== 'A') {
+            parent = parent.parentNode;
+            parentCount ++;
+          }
+          if (parent && parent.href && parent.href.includes('/pages/customize?design=&')) {
+            parent.href = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+          }
+          // Update Edit link for old store
+          oldLinks = document.querySelectorAll('a');
+          for (link of oldLinks) {
+            innerText = link.innerText.trim();
+            if (innerText === 'Edit' || innerText === 'Edit Design') {
+              if (link.href && link.href.includes('/pages/customize?design=&')) {
+                link.href = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+                break;
+              }
+            }
+          }
+          // Update Title link for old store
+          oldLinks = document.querySelectorAll('a');
+          for (link of oldLinks) {
+            if (link.href && link.href.includes('/pages/customize?design=&')) {
+              link.href = "/pages/customize?design={{ item.properties['_Design Public ID'] }}&line={{ forloop.index }}";
+              break;
+            }
+          }
+        {% endif %}
+      {% endfor %}
+    } else {
+      // Check all images are updated
+      var imageDone = true;
+      {% for item in cart.items %}
+        {% if item.product.type == 'Bare Product' %}
+          // Check image is updated
+          img = document.querySelector('img[src="{{ item.properties['_Design Image URL'] }}"]');
+          if (!img) {
+            imageDone = false;
+          }
+        {% endif %}
+      {% endfor %}
+
+      if (document.location.pathname === '/cart' && !imageDone) {
+        window.setTimeout(function() {
+          updateCustomizedCart();
+        }, 1000)
+      }
+    }
+  }
+
+  updateCustomizedCart();
+</script>

@@ -1,0 +1,30 @@
+<script>
+  var customizedCollectionConfig = {
+    productSelector: '.thumbnail',
+    removeElementSelector: '.ajax-submit, .add_to_cart, .quick_shop',
+  };
+
+  if (typeof CustomizedAppCollectionConfig === 'object' ) {
+    for (prop in CustomizedAppCollectionConfig) {
+      customizedCollectionConfig[prop] = CustomizedAppCollectionConfig[prop]
+    }
+  }
+
+  if (customizedCollectionConfig.productSelector) {
+    var allProductElements = document.querySelectorAll(customizedCollectionConfig.productSelector);
+
+    {% for product in collection.products %}
+      {% if product.type == 'Bare Product' or product.type == 'Custom Product' or product.type == 'Customized Custom' or product.type == 'Customized Bare' %}
+        productLinkSelector = 'a[href="{{ product.url }}"], a[href="{{ product.url | within: collection}}"]';
+
+        for (productElement of allProductElements) {
+          if (productElement.querySelector(productLinkSelector)) {
+            removeElements = productElement.querySelectorAll(customizedCollectionConfig.removeElementSelector);
+            for (removeEl of removeElements) { removeEl.remove(); }
+            break;
+          }
+        }      
+      {% endif  %}
+    {% endfor %}
+  }
+</script>

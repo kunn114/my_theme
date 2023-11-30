@@ -1,0 +1,42 @@
+{
+  "name": "Theme",
+  "version": "1.0.0",
+  "description": "Theme description",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "dev": "env-cmd -r shopify.env.json -e development shopify theme dev & webpack --watch",
+    "dev:test": "env-cmd -r shopify.env.json -e test shopify theme dev & webpack --watch",
+    "dev:prod": "env-cmd -r shopify.env.json -e test,production shopify theme dev & webpack --watch",
+    "push:test": "env-cmd -r shopify.env.json -e test shopify theme push -u",
+    "push:prod": "env-cmd -r shopify.env.json -e test,production shopify theme push -u",
+    "push:shopify-incomplete-solution": "shopify theme push --preset development"
+  },
+  "author": "Sainstore",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.13.1",
+    "@babel/preset-env": "^7.13.5",
+    "@shopify/themekit": "^1.1.7",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^5.0.2",
+    "file-loader": "^6.2.0",
+    "glob": "^7.1.6",
+    "mini-css-extract-plugin": "^1.3.6",
+    "node-sass": "^8.0.0",
+    "path": "^0.12.7",
+    "sass-loader": "^11.0.1",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.21.2",
+    "webpack-cli": "^4.10.0",
+    "webpack-fix-style-only-entries": "^0.6.1"
+  },
+  "dependencies": {
+    "@fancyapps/ui": "^4.0.31",
+    "env-cmd": "^10.1.0",
+    "jquery": "^3.6.1",
+    "plyr": "^3.6.8",
+    "vanilla-marquee": "^1.1.2"
+  }
+}
