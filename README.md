@@ -2,6 +2,11 @@
 my_theme
 
 
+## install
+```shell
+npm i
+```
+
 ## build
 ```shell
 npm run build
